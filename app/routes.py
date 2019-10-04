@@ -2,8 +2,8 @@ from flask import render_template, flash, redirect, url_for, request, make_respo
 from app import app, prepared_query, unsafe_query
 from app.forms import IndexForm, PostForm, FriendsForm, ProfileForm, CommentsForm
 from datetime import datetime
-import os
 from flask_wtf.csrf import CSRFError
+import os
 
 # this file contains all the different routes, and the logic for communicating with the database
 
@@ -44,7 +44,8 @@ def stream(username):
             form.image.data.save(path)
 
 
-        unsafe_query('INSERT INTO Posts (u_id, content, image, creation_time) VALUES({}, "{}", "{}", \'{}\');'.format(user['id'], form.content.data, form.image.data.filename, datetime.now().strftime("%d/%m/%Y %H:%M:%S") ))
+        queryString = 'INSERT INTO Posts (u_id, content, image, creation_time) VALUES(?, ?, ?, ?);'
+        prepared_query(queryString, (user['id'], form.content.data, form.image.data.filename, datetime.now().strftime("%d/%m/%Y %H:%M:%S")) )
         return redirect(url_for('stream', username=username))
 
     posts = unsafe_query('SELECT p.*, u.*, (SELECT COUNT(*) FROM Comments WHERE p_id=p.id) AS cc FROM Posts AS p JOIN Users AS u ON u.id=p.u_id WHERE p.u_id IN (SELECT u_id FROM Friends WHERE f_id={0}) OR p.u_id IN (SELECT f_id FROM Friends WHERE u_id={0}) OR p.u_id={0} ORDER BY p.creation_time DESC;'.format(user['id']))
@@ -59,10 +60,12 @@ def comments(username, p_id):
     if form.validate_on_submit():
         queryString = 'SELECT * FROM Users WHERE username=?;'
         user = prepared_query(queryString, (username,), one=True)
-        unsafe_query('INSERT INTO Comments (p_id, u_id, comment, creation_time) VALUES({}, {}, "{}", \'{}\');'.format(p_id, user['id'], form.comment.data, datetime.now().strftime("%d/%m/%Y %H:%M:%S") ))
+        queryString = 'INSERT INTO Comments (p_id, u_id, comment, creation_time) VALUES(?, ?, ? ?);'
+        prepared_query(queryString, (p_id, user['id'], form.comment.data, datetime.now().strftime("%d/%m/%Y %H:%M:%S")) )
 
     queryString = 'SELECT * FROM Posts WHERE id=?;'
     post = prepared_query(queryString, (p_id,), one=True)
+
     all_comments = unsafe_query('SELECT DISTINCT * FROM Comments AS c JOIN Users AS u ON c.u_id=u.id WHERE c.p_id={} ORDER BY c.creation_time DESC;'.format(p_id))
     return render_template('comments.html', title='Comments', username=username, form=form, post=post, comments=all_comments)
 
@@ -72,13 +75,16 @@ def comments(username, p_id):
 @app.route('/friends/<username>', methods=['GET', 'POST'])
 def friends(username):
     form = FriendsForm()
-    user = unsafe_query('SELECT * FROM Users WHERE username="{}";'.format(username), one=True)
+    queryString = 'SELECT * FROM Users WHERE username=?;'
+    user = prepared_query(queryString, (username,), one=True)
     if form.validate_on_submit():
-        friend = unsafe_query('SELECT * FROM Users WHERE username="{}";'.format(form.username.data), one=True)
+        queryString = 'SELECT * FROM Users WHERE username=?;'
+        friend = prepared_query(queryString, (form.username.data,), one=True)
         if friend is None:
             flash('User does not exist')
         else:
-            unsafe_query('INSERT INTO Friends (u_id, f_id) VALUES({}, {});'.format(user['id'], friend['id']))
+            queryString = 'INSERT INTO Friends (u_id, f_id) VALUES(?, ?);'
+            prepared_query(queryString, (user['id'], friend['id']))
     
     all_friends = unsafe_query('SELECT * FROM Friends AS f JOIN Users as u ON f.f_id=u.id WHERE f.u_id={} AND f.f_id!={} ;'.format(user['id'], user['id']))
     return render_template('friends.html', title='Friends', username=username, friends=all_friends, form=form)
