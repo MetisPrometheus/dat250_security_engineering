@@ -1,6 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField, SubmitField, FormField, TextAreaField, FileField
 from wtforms.fields.html5 import DateField
+from wtforms import validators
 
 # defines all forms in the application, these will be instantiated by the template,
 # and the routes.py will read the values of the fields
@@ -14,11 +15,11 @@ class LoginForm(FlaskForm):
     submit = SubmitField('Sign In')
 
 class RegisterForm(FlaskForm):
-    first_name = StringField('First Name', render_kw={'placeholder': 'First Name'})
-    last_name = StringField('Last Name', render_kw={'placeholder': 'Last Name'})
-    username = StringField('Username', render_kw={'placeholder': 'Username'})
-    password = PasswordField('Password', render_kw={'placeholder': 'Password'})
-    confirm_password = PasswordField('Confirm Password', render_kw={'placeholder': 'Confirm Password'})
+    first_name = StringField('First Name', render_kw={'placeholder': 'First Name'}, validators=[validators.InputRequired()])
+    last_name = StringField('Last Name', render_kw={'placeholder': 'Last Name'}, validators=[validators.InputRequired()])
+    username = StringField('Username', render_kw={'placeholder': 'Username'}, validators=[validators.InputRequired()])
+    password = PasswordField('Password', render_kw={'placeholder': 'Password'}, validators=[validators.InputRequired()])
+    confirm_password = PasswordField('Confirm Password', render_kw={'placeholder': 'Confirm Password'}, validators=[validators.InputRequired(), validators.Length(min=8, max=50)])
     submit = SubmitField('Sign Up')
 
 class IndexForm(FlaskForm):
@@ -26,16 +27,16 @@ class IndexForm(FlaskForm):
     register = FormField(RegisterForm)
 
 class PostForm(FlaskForm):
-    content = TextAreaField('New Post', render_kw={'placeholder': 'What are you thinking about?'})
+    content = TextAreaField('New Post', render_kw={'placeholder': 'What are you thinking about?'}, validators=[validators.InputRequired()])
     image = FileField('Image')
     submit = SubmitField('Post')
 
 class CommentsForm(FlaskForm):
-    comment = TextAreaField('New Comment', render_kw={'placeholder': 'What do you have to say?'})
+    comment = TextAreaField('New Comment', render_kw={'placeholder': 'What do you have to say?'}, validators=[validators.InputRequired()])
     submit = SubmitField('Comment')
 
 class FriendsForm(FlaskForm):
-    username = StringField('Friend\'s username', render_kw={'placeholder': 'Username'})
+    username = StringField('Friend\'s username', render_kw={'placeholder': 'Username'}, validators=[validators.InputRequired()])
     submit = SubmitField('Add Friend')
 
 class ProfileForm(FlaskForm):
