@@ -6,11 +6,12 @@ from flask_wtf.csrf import CSRFProtect
 import sqlite3
 import os
 
-# create and configure app
+
 csrf = CSRFProtect()
+# create and configure app
 app = Flask(__name__)
 Bootstrap(app)
-app.config.from_object(Config)
+app.config.from_object(Config) 
 csrf.init_app(app)
 
 # TODO: Handle login management better, maybe with flask_login?
@@ -32,8 +33,17 @@ def init_db():
             db.cursor().executescript(f.read())
         db.commit()
 
+# prepared sql queries
+def prepared_query(query, paramsTuple, one=False):
+    db = get_db()
+    cursor = db.execute(query, paramsTuple)
+    rv = cursor.fetchall()
+    cursor.close()
+    db.commit()
+    return (rv[0] if rv else None) if one else rv
+
 # perform generic query, not very secure yet
-def query_db(query, one=False):
+def unsafe_query(query, one=False):
     db = get_db()
     cursor = db.execute(query)
     rv = cursor.fetchall()
