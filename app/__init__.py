@@ -2,13 +2,16 @@ from flask import Flask, g
 from config import Config
 from flask_bootstrap import Bootstrap
 #from flask_login import LoginManager
+from flask_wtf.csrf import CSRFProtect
 import sqlite3
 import os
 
 # create and configure app
+csrf = CSRFProtect()
 app = Flask(__name__)
 Bootstrap(app)
 app.config.from_object(Config)
+csrf.init_app(app)
 
 # TODO: Handle login management better, maybe with flask_login?
 #login = LoginManager(app)
