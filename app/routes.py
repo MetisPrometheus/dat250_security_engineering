@@ -2,6 +2,7 @@ from flask import render_template, flash, redirect, url_for, request
 from app import app, query_db
 from app.forms import IndexForm, PostForm, FriendsForm, ProfileForm, CommentsForm
 from datetime import datetime
+from flask_wtf.csrf import CSRFError
 import os
 
 # this file contains all the different routes, and the logic for communicating with the database
@@ -84,3 +85,16 @@ def profile(username):
     
     user = query_db('SELECT * FROM Users WHERE username="{}";'.format(username), one=True)
     return render_template('profile.html', title='profile', username=username, user=user, form=form)
+
+# enabling different https response headers
+@app.after_request
+def add_security_headers(resp):
+    resp.headers['X-Frame-Options'] = 'SAMEORIGIN'
+    resp.headers['X-XSS-Protection'] = 1
+    resp.headers['X-Content-Type-Options'] = 'nosniff'
+    return resp
+
+# send user to a custom 'validation-failed' page
+# @app.errorhandler(CSRFError)
+# def handle_csrf_error(e):
+#     return render_template('csrf_error.html', reason=e.description), 400
