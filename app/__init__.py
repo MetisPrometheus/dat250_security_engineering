@@ -7,8 +7,8 @@ import sqlite3
 import os
 
 
-csrf = CSRFProtect()
 # create and configure app
+csrf = CSRFProtect()
 app = Flask(__name__)
 Bootstrap(app)
 app.config.from_object(Config) 
@@ -34,18 +34,18 @@ def init_db():
         db.commit()
 
 # prepared sql queries
-def prepared_query(query, paramsTuple, one=False):
+def prepared_query(preparedQuery, tupleArgs, one=False):
     db = get_db()
-    cursor = db.execute(query, paramsTuple)
+    cursor = db.execute(preparedQuery, tupleArgs)
     rv = cursor.fetchall()
     cursor.close()
     db.commit()
     return (rv[0] if rv else None) if one else rv
 
 # perform generic query, not very secure yet
-def unsafe_query(query, one=False):
+def unsafe_query(preparedQuery, one=False):
     db = get_db()
-    cursor = db.execute(query)
+    cursor = db.execute(preparedQuery)
     rv = cursor.fetchall()
     cursor.close()
     db.commit()
