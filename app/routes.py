@@ -24,10 +24,13 @@ def index():
             flash('Sorry, wrong password!')
 
     elif form.register.validate_on_submit() and form.register.submit.data: 
-        queryString = 'INSERT INTO Users (username, first_name, last_name, password) VALUES(?,?,?,?);'
-        prepared_query(queryString, (form.register.username.data, form.register.first_name.data,
-         form.register.last_name.data, form.register.password.data))
-        return redirect(url_for('index'))
+        if form.register.password.data == form.register.confirm_password.data:
+            queryString = 'INSERT INTO Users (username, first_name, last_name, password) VALUES(?,?,?,?);'
+            prepared_query(queryString, (form.register.username.data, form.register.first_name.data,
+             form.register.last_name.data, form.register.password.data))
+            return redirect(url_for('index'))
+        else:
+            flash('Passwords do not match!')
     return render_template('index.html', title='Welcome', form=form)
 
 
