@@ -43,9 +43,9 @@ def prepared_query(preparedQuery, tupleArgs, one=False):
     return (rv[0] if rv else None) if one else rv
 
 # perform generic query, not very secure yet
-def unsafe_query(preparedQuery, one=False):
+def unsafe_query(unpreparedQuery, one=False):
     db = get_db()
-    cursor = db.execute(preparedQuery)
+    cursor = db.execute(unpreparedQuery)
     rv = cursor.fetchall()
     cursor.close()
     db.commit()
