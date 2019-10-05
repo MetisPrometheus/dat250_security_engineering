@@ -1,7 +1,7 @@
 from flask import Flask, g
 from config import Config
 from flask_bootstrap import Bootstrap
-#from flask_login import LoginManager
+from flask_login import LoginManager, UserMixin
 from flask_wtf.csrf import CSRFProtect
 import sqlite3
 import os
@@ -11,11 +11,28 @@ import os
 csrf = CSRFProtect()
 app = Flask(__name__)
 Bootstrap(app)
-app.config.from_object(Config) 
+app.config.from_object(Config)
 csrf.init_app(app)
+# load and configure flask_login authentication
+login = LoginManager(app)
+login.login_view = 'index'
 
-# TODO: Handle login management better, maybe with flask_login?
-#login = LoginManager(app)
+
+class User(UserMixin):
+    pass
+
+
+@login.user_loader
+def load_user(user_id):
+    query = 'SELECT * FROM Users WHERE id=?;'
+    user_row = prepared_query(query, (user_id,), one=True)
+    if user_row is None:
+        return None
+    user = User()
+    user.id = user_row['id']
+    user.username = user_row['username']
+    return user
+
 
 # get an instance of the db
 def get_db():
