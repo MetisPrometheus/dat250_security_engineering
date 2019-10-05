@@ -1,4 +1,5 @@
 from flask import render_template, flash, redirect, url_for, request, make_response
+from werkzeug.security import generate_password_hash, check_password_hash
 from app import app, prepared_query, unsafe_query
 from app.forms import IndexForm, PostForm, FriendsForm, ProfileForm, CommentsForm
 from datetime import datetime
@@ -18,7 +19,7 @@ def index():
         user = prepared_query(queryString, (form.login.username.data,), one=True)
         if user == None:
             flash('Sorry, this user does not exist!')
-        elif user['password'] == form.login.password.data: 
+        elif check_password_hash(user['password'], form.login.password.data):
             return redirect(url_for('stream', username=form.login.username.data))
         else:
             flash('Sorry, wrong password!')
@@ -27,7 +28,7 @@ def index():
         if form.register.password.data == form.register.confirm_password.data:
             queryString = 'INSERT INTO Users (username, first_name, last_name, password) VALUES(?,?,?,?);'
             prepared_query(queryString, (form.register.username.data, form.register.first_name.data,
-             form.register.last_name.data, form.register.password.data))
+             form.register.last_name.data, generate_password_hash(form.register.password.data)))
             return redirect(url_for('index'))
         else:
             flash('Passwords do not match!')
