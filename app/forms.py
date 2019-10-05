@@ -9,8 +9,10 @@ from wtforms import validators
 # TODO: There was some important security feature that wtforms provides, but I don't remember what; implement it
 
 class LoginForm(FlaskForm):
-    username = StringField('Username', render_kw={'placeholder': 'Username', 'maxlength' : 30}) 
-    password = PasswordField('Password', render_kw={'placeholder': 'Password'})
+    username = StringField('Username', render_kw={'placeholder': 'Username', 'maxlength' : 30},
+        validators=[validators.Regexp(r'^[a-zA-Z0-9 ]*$')]) 
+    password = PasswordField('Password', render_kw={'placeholder': 'Password'}, 
+        validators=[validators.Regexp(r'^[a-zA-Z0-9 ]*$')])
     remember_me = BooleanField('Remember me') # TODO: It would be nice to have this feature implemented, probably by using cookies
     submit = SubmitField('Sign In')
 
@@ -37,13 +39,13 @@ class IndexForm(FlaskForm):
 
 class PostForm(FlaskForm):
     content = TextAreaField('New Post', render_kw={'placeholder': 'What are you thinking about?', 'maxlength' : 2000}, 
-        validators=[validators.InputRequired(), validators.Length(max=2000)])
+        validators=[validators.InputRequired(), validators.Length(max=2000), validators.Regexp(r'^[a-zA-Z0-9 ]*$')])
     image = FileField('Image')
     submit = SubmitField('Post')
 
 class CommentsForm(FlaskForm):
     comment = TextAreaField('New Comment', render_kw={'placeholder': 'What do you have to say?', 'maxlength' : 2000}, 
-        validators=[validators.InputRequired(), validators.Length(max=2000)])
+        validators=[validators.InputRequired(), validators.Length(max=2000), validators.Regexp(r'^[a-zA-Z0-9 ]*$')])
     submit = SubmitField('Comment')
 
 class FriendsForm(FlaskForm):
