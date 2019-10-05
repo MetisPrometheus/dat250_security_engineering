@@ -16,18 +16,18 @@ def index():
 
     if form.login.validate_on_submit() and form.login.submit.data:
         queryString = 'SELECT * FROM Users WHERE username=?;'
-        user = prepared_query(queryString, (form.login.username.data,), one=True)
+        user = prepared_query(queryString, (form.login.username.data.lower(),), one=True)
         if user == None:
             flash('Sorry, this user does not exist!')
         elif check_password_hash(user['password'], form.login.password.data):
-            return redirect(url_for('stream', username=form.login.username.data))
+            return redirect(url_for('stream', username=form.login.username.data.lower()))
         else:
             flash('Sorry, wrong password!')
 
     elif form.register.validate_on_submit() and form.register.submit.data: 
         if form.register.password.data == form.register.confirm_password.data:
             queryString = 'INSERT INTO Users (username, first_name, last_name, password) VALUES(?,?,?,?);'
-            prepared_query(queryString, (form.register.username.data, form.register.first_name.data,
+            prepared_query(queryString, (form.register.username.data.lower(), form.register.first_name.data,
              form.register.last_name.data, generate_password_hash(form.register.password.data)))
             return redirect(url_for('index'))
         else:
@@ -83,7 +83,7 @@ def friends(username):
     user = prepared_query(queryString, (username,), one=True)
     if form.validate_on_submit():
         queryString = 'SELECT * FROM Users WHERE username=?;'
-        friend = prepared_query(queryString, (form.username.data,), one=True)
+        friend = prepared_query(queryString, (form.username.data.lower(),), one=True)
         if friend is None:
             flash('User does not exist')
         else:
