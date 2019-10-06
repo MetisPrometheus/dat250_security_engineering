@@ -18,8 +18,8 @@ import os
 def index():
     form = IndexForm()
     if form.login.validate_on_submit() and form.login.submit.data:
-        queryString = 'SELECT * FROM Users WHERE username=?;'
-        user = prepared_query(queryString, (form.login.username.data.lower(),), one=True)
+        preparedQuery = 'SELECT * FROM Users WHERE username=?;'
+        user = prepared_query(preparedQuery, (form.login.username.data.lower(),), one=True)
         if user is None:
             flash('Sorry, invalid credentials!')
         elif check_password_hash(user['password'], form.login.password.data):
@@ -30,16 +30,16 @@ def index():
             flash('Sorry, invalid credentials!')
 
     elif form.register.validate_on_submit() and form.register.submit.data:
-        queryString = 'SELECT * FROM Users WHERE username=?;'
-        existing_user = prepared_query(queryString, (form.register.username.data.lower(),), one=True)
+        preparedQuery = 'SELECT * FROM Users WHERE username=?;'
+        existing_user = prepared_query(preparedQuery, (form.register.username.data.lower(),), one=True)
 
         if existing_user is not None:
             flash('Sorry, invalid username!')
         elif form.register.password.data != form.register.confirm_password.data:
             flash('Passwords do not match!')
         else:
-            queryString = 'INSERT INTO Users (username, first_name, last_name, password) VALUES(?,?,?,?);'
-            prepared_query(queryString, (form.register.username.data.lower(), form.register.first_name.data,
+            preparedQuery = 'INSERT INTO Users (username, first_name, last_name, password) VALUES(?,?,?,?);'
+            prepared_query(preparedQuery, (form.register.username.data.lower(), form.register.first_name.data,
                                          form.register.last_name.data,
                                          generate_password_hash(form.register.password.data)))
             return redirect(url_for('index'))
@@ -59,8 +59,8 @@ def logout():
 @login_required
 def stream():
     form = PostForm()
-    queryString = 'SELECT * FROM Users WHERE id=?;'
-    user = prepared_query(queryString, (current_user.id,), one=True)
+    preparedQuery = 'SELECT * FROM Users WHERE id=?;'
+    user = prepared_query(preparedQuery, (current_user.id,), one=True)
     canSubmit = True
     if form.validate_on_submit():
         if form.image.data:
@@ -71,18 +71,18 @@ def stream():
                 canSubmit = False
                 flash("Illegal file extension!")
         if canSubmit:
-            queryString = 'INSERT INTO Posts (u_id, content, image, creation_time) VALUES(?, ?, ?, ?);'
-            prepared_query(queryString, (
+            preparedQuery = 'INSERT INTO Posts (u_id, content, image, creation_time) VALUES(?, ?, ?, ?);'
+            prepared_query(preparedQuery, (
                 user['id'], form.content.data, form.image.data.filename, datetime.now().strftime("%d/%m/%Y %H:%M:%S")))
         return redirect(url_for('stream'))
 
-    queryString = 'SELECT p.*, u.*, (SELECT COUNT(*) FROM Comments WHERE p_id=p.id) AS cc ' \
+    preparedQuery = 'SELECT p.*, u.*, (SELECT COUNT(*) FROM Comments WHERE p_id=p.id) AS cc ' \
                   'FROM Posts AS p JOIN Users AS u ON u.id=p.u_id ' \
                   'WHERE p.u_id IN (SELECT u_id FROM Friends WHERE f_id=?) ' \
                   'OR p.u_id IN (SELECT f_id FROM Friends WHERE u_id=?) ' \
                   'OR p.u_id=? ' \
                   'ORDER BY p.creation_time DESC;'
-    posts = prepared_query(queryString, (current_user.id, current_user.id, current_user.id))
+    posts = prepared_query(preparedQuery, (current_user.id, current_user.id, current_user.id))
     return render_template('stream.html', title='Stream', form=form, posts=posts)
 
 
@@ -92,11 +92,11 @@ def stream():
 def comments(p_id):
     form = CommentsForm()
     if form.validate_on_submit():
-        queryString = 'INSERT INTO Comments (p_id, u_id, comment, creation_time) VALUES(?, ?, ?, ?);'
-        prepared_query(queryString, (p_id, current_user.id, form.comment.data, datetime.now().strftime("%d/%m/%Y %H:%M:%S")))
+        preparedQuery = 'INSERT INTO Comments (p_id, u_id, comment, creation_time) VALUES(?, ?, ?, ?);'
+        prepared_query(preparedQuery, (p_id, current_user.id, form.comment.data, datetime.now().strftime("%d/%m/%Y %H:%M:%S")))
 
-    queryString = 'SELECT * FROM Posts WHERE id=?;'
-    post = prepared_query(queryString, (p_id,), one=True)
+    preparedQuery = 'SELECT * FROM Posts WHERE id=?;'
+    post = prepared_query(preparedQuery, (p_id,), one=True)
 
     all_comments = unsafe_query(
         'SELECT DISTINCT * FROM Comments AS c JOIN Users AS u ON c.u_id=u.id WHERE c.p_id={} ORDER BY c.creation_time DESC;'.format(
@@ -109,23 +109,23 @@ def comments(p_id):
 @login_required
 def friends():
     form = FriendsForm()
-    queryString = 'SELECT * FROM Users WHERE id=?;'
-    user = prepared_query(queryString, (current_user.id,), one=True)
+    preparedQuery = 'SELECT * FROM Users WHERE id=?;'
+    user = prepared_query(preparedQuery, (current_user.id,), one=True)
     if form.validate_on_submit():
-        queryString = 'SELECT * FROM Users WHERE username=?;'
-        friend = prepared_query(queryString, (form.username.data.lower(),), one=True)
+        preparedQuery = 'SELECT * FROM Users WHERE username=?;'
+        friend = prepared_query(preparedQuery, (form.username.data.lower(),), one=True)
         if friend is None:
             flash('User does not exist')
         else:
             try:
-                queryString = 'INSERT INTO Friends (u_id, f_id) VALUES(?, ?);'
-                prepared_query(queryString, (user['id'], friend['id']))
+                preparedQuery = 'INSERT INTO Friends (u_id, f_id) VALUES(?, ?);'
+                prepared_query(preparedQuery, (user['id'], friend['id']))
             except sqlite3.IntegrityError:
                 flash('Already friends')
-    queryString = 'SELECT * FROM Friends AS f ' \
+    preparedQuery = 'SELECT * FROM Friends AS f ' \
                   'JOIN Users as u ON f.f_id=u.id ' \
                   'WHERE f.u_id=? AND f.f_id !=?  ;'
-    all_friends = prepared_query(queryString, (current_user.id, current_user.id))
+    all_friends = prepared_query(preparedQuery, (current_user.id, current_user.id))
     return render_template('friends.html', title='Friends', friends=all_friends, form=form)
 
 
@@ -134,18 +134,18 @@ def friends():
 @login_required
 def profile(username):
     username = username.lower()
-    queryString = 'SELECT * FROM Users WHERE username=?;'
-    user = prepared_query(queryString, (username,), one=True)
+    preparedQuery = 'SELECT * FROM Users WHERE username=?;'
+    user = prepared_query(preparedQuery, (username,), one=True)
 
     # viewing current_user's own profile
     if username == current_user.username:
         form = ProfileForm(user)
         if form.validate_on_submit():
             app.logger.info('failed to log in')
-            queryString = 'UPDATE Users ' \
+            preparedQuery = 'UPDATE Users ' \
                           'SET education=?, employment=?, music=?, movie=?, nationality=?, birthday=? ' \
                           'WHERE id=?;'
-            prepared_query(queryString, (
+            prepared_query(preparedQuery, (
                 form.education.data, form.employment.data, form.music.data, form.movie.data, form.nationality.data,
                 form.birthday.data, current_user.id))
             return redirect(url_for('profile', username=username))
