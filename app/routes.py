@@ -61,19 +61,19 @@ def stream():
     form = PostForm()
     queryString = 'SELECT * FROM Users WHERE id=?;'
     user = prepared_query(queryString, (current_user.id,), one=True)
+    canSubmit = True
     if form.validate_on_submit():
         if form.image.data:
             if allowed_file(form.image.data.filename):
-                #TODO: check against ALLOWED_EXTENSIONS
                 path = os.path.join(app.config['UPLOAD_PATH'], form.image.data.filename)
                 form.image.data.save(path) 
             else:
+                canSubmit = False
                 flash("Illegal file extension!")
-                return render_template('error.html')                
-        
-        queryString = 'INSERT INTO Posts (u_id, content, image, creation_time) VALUES(?, ?, ?, ?);'
-        prepared_query(queryString, (
-            user['id'], form.content.data, form.image.data.filename, datetime.now().strftime("%d/%m/%Y %H:%M:%S")))
+        if canSubmit:
+            queryString = 'INSERT INTO Posts (u_id, content, image, creation_time) VALUES(?, ?, ?, ?);'
+            prepared_query(queryString, (
+                user['id'], form.content.data, form.image.data.filename, datetime.now().strftime("%d/%m/%Y %H:%M:%S")))
         return redirect(url_for('stream'))
 
     queryString = 'SELECT p.*, u.*, (SELECT COUNT(*) FROM Comments WHERE p_id=p.id) AS cc ' \
