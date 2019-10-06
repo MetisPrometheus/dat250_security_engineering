@@ -63,8 +63,14 @@ def stream():
     user = prepared_query(queryString, (current_user.id,), one=True)
     if form.validate_on_submit():
         if form.image.data:
-            path = os.path.join(app.config['UPLOAD_PATH'], form.image.data.filename)
-            form.image.data.save(path)
+            if allowed_file(form.image.data.filename):
+                #TODO: check against ALLOWED_EXTENSIONS
+                path = os.path.join(app.config['UPLOAD_PATH'], form.image.data.filename)
+                form.image.data.save(path) 
+            else:
+                flash("Illegal file extension!")
+                return render_template('error.html')                
+        
         queryString = 'INSERT INTO Posts (u_id, content, image, creation_time) VALUES(?, ?, ?, ?);'
         prepared_query(queryString, (
             user['id'], form.content.data, form.image.data.filename, datetime.now().strftime("%d/%m/%Y %H:%M:%S")))
@@ -158,3 +164,8 @@ def add_security_headers(resp):
 @app.errorhandler(Exception)
 def handle_error(e):
     return render_template('error.html')
+
+#check if file has an allowed extension
+def allowed_file(filename):
+    return '.' in filename and \
+            filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
