@@ -51,7 +51,7 @@ def init_db():
         db.commit()
 
 # prepared sql queries
-def prepared_query(preparedQuery, tupleArgs, one=False):
+def safe_query(preparedQuery, tupleArgs, one=False):
     db = get_db()
     cursor = db.execute(preparedQuery, tupleArgs)
     rv = cursor.fetchall()
