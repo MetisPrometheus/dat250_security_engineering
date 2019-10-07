@@ -7,3 +7,5 @@ class Config(object):
     DATABASE = 'database.db'
     UPLOAD_PATH = 'app/static/uploads'
     ALLOWED_EXTENSIONS = {'jpg', 'png', 'gif'} # Might use this at some point, probably don't want people to upload any file type
+    MAX_CONTENT_LENGTH = 50 * 1024 * 1024
+    
