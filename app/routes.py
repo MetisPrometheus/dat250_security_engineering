@@ -19,7 +19,7 @@ def index():
     form = IndexForm()
     if form.login.validate_on_submit() and form.login.submit.data:
         preparedQuery = 'SELECT * FROM Users WHERE username=?;'
-        user = safe_query(preparedQuery, (form.register.username.data.lower(),), one=True)
+        user = safe_query(preparedQuery, (form.login.username.data.lower(),), one=True)
         if user is None:
             flash('Sorry, invalid credentials!')
         elif check_password_hash(user['password'], form.login.password.data):
