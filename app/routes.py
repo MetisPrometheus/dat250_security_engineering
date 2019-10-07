@@ -161,7 +161,7 @@ def profile(username):
 
 @app.after_request
 def add_security_headers(resp):
-    resp.headers['Content-Security-Policy'] = "default-src 'self'"
+    #resp.headers['Content-Security-Policy'] = "default-src 'self'"
     resp.headers['X-Frame-Options'] = 'SAMEORIGIN'
     resp.headers['X-XSS-Protection'] = '1; mode=block'
     resp.headers['X-Content-Type-Options'] = 'nosniff'
