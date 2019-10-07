@@ -25,7 +25,7 @@ class User(UserMixin):
 @login.user_loader
 def load_user(user_id):
     query = 'SELECT * FROM Users WHERE id=?;'
-    user_row = prepared_query(query, (user_id,), one=True)
+    user_row = safe_query(query, (user_id,), one=True)
     if user_row is None:
         return None
     user = User()
