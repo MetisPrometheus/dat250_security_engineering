@@ -100,7 +100,10 @@ def comments(p_id):
     preparedQuery = 'SELECT * FROM Posts WHERE id=?;'
     post = safe_query(preparedQuery, (p_id,), one=True)
 
-    preparedQuery = 'SELECT DISTINCT * FROM Comments AS c JOIN Users AS u ON c.u_id=u.id WHERE c.p_id=? ORDER BY c.creation_time DESC;'
+    preparedQuery = 'SELECT DISTINCT * FROM Comments AS c '\
+    'JOIN Users AS u ON c.u_id=u.id '\
+    'WHERE c.p_id=?'\
+    'ORDER BY c.creation_time DESC;'
     all_comments = safe_query(preparedQuery, (p_id,))
     return render_template('comments.html', title='Comments', form=form, post=post, comments=all_comments)
 
