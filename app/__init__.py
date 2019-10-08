@@ -15,8 +15,8 @@ app.config.from_object(Config)
 csrf.init_app(app)
 # load and configure flask_login authentication
 login = LoginManager(app)
+login.session_protection = "strong"
 login.login_view = 'index'
-
 
 class User(UserMixin):
     pass

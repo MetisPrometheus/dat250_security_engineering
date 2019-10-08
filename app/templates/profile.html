@@ -6,12 +6,12 @@
         <div class="col-sm-12 col-lg-6">
             <div class="card">
                 <div class="card-body">
-                    <h1 class="card-text">About {{current_user.username}}</h1>
+                    <h1 class="card-text">About {{user.username}}</h1>
                     {% if user.id == current_user.id %}
-                        <button type="button" class="btn btn-link" id="edit-button"><span class="fa fa-edit"></span>&nbsp;Edit</button>
+                        <button type="button" class="btn btn-link" id="edit-button" style="{% if edit %}display: none;{% endif %}"><span class="fa fa-edit"></span>&nbsp;Edit</button>
                         <!--Edit details-->
-                        <div id="edit-details" style="display: none;">
-                            <form action="" method="POST">
+                        <div id="edit-details" style="{% if not edit %}display: none;{% endif %}">
+                            <form action="", method="POST">
                                 {{ form.csrf_token }}
                                 {{ wtf.form_field(form.education) }}
                                 {{ wtf.form_field(form.employment) }}
@@ -24,7 +24,7 @@
                         </div>
                     {% endif %}
                     <!--View details-->
-                    <div id="view-details">
+                    <div id="view-details" style="{% if edit %}display: none;{% endif %}">
                         <ul class="list-group list-group-flush">
                             <li class="list-group-item d-inline">
                                 <div class="row">

@@ -142,21 +142,29 @@ def profile(username):
     username = username.lower()
     preparedQuery = 'SELECT * FROM Users WHERE username=?;'
     user = safe_query(preparedQuery, (username,), one=True)
+    edit = False
+    form = ProfileForm()
 
-    # viewing current_user's own profile
     if username == current_user.username:
-        form = ProfileForm(user)
         if form.validate_on_submit():
             preparedQuery = 'UPDATE Users ' \
-                          'SET education=?, employment=?, music=?, movie=?, nationality=?, birthday=? ' \
-                          'WHERE id=?;'
+                            'SET education=?, employment=?, music=?, movie=?, nationality=?, birthday=? ' \
+                            'WHERE id=?;'
             data = (form.education.data, form.employment.data, form.music.data, form.movie.data, form.nationality.data,
-                form.birthday.data, current_user.id)
+                    form.birthday.data, current_user.id)
             safe_query(preparedQuery, data)
             return redirect(url_for('profile', username=username))
-        return render_template('profile.html', title='Profile', user=user, form=form)
-    else:
-        return render_template('profile.html', title='Profile', user=user)
+        elif form.is_submitted():
+            edit = True
+
+        form.education.data = user['education']
+        form.nationality.data = user['nationality']
+        form.music.data = user['music']
+        form.movie.data = user['movie']
+        form.employment.data = user['employment']
+        form.birthday.data = datetime.strptime(user['birthday'], '%Y-%m-%d')
+
+    return render_template('profile.html', title='Profile', user=user, form=form, edit=edit)
 
 
 @app.after_request
