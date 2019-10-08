@@ -156,13 +156,18 @@ def profile(username):
             return redirect(url_for('profile', username=username))
         elif form.is_submitted():
             edit = True
-
-        form.education.data = user['education']
-        form.nationality.data = user['nationality']
-        form.music.data = user['music']
-        form.movie.data = user['movie']
-        form.employment.data = user['employment']
-        form.birthday.data = datetime.strptime(user['birthday'], '%Y-%m-%d')
+        if user['education'] != 'Unknown':
+            form.education.data = user['education']
+        if user['nationality'] != 'Unknown':
+            form.nationality.data = user['nationality']
+        if user['music'] != 'Unknown':
+            form.music.data = user['music']
+        if user['movie'] != 'Unknown':
+            form.movie.data = user['movie']
+        if user['employment'] != 'Unknown':
+            form.employment.data = user['employment']
+        if user['birthday'] != 'Unknown':
+            form.birthday.data = datetime.strptime(user['birthday'], '%Y-%m-%d')
 
     return render_template('profile.html', title='Profile', user=user, form=form, edit=edit)
 
