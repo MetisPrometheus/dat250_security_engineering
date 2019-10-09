@@ -174,7 +174,15 @@ def profile(username):
 
 @app.after_request
 def add_security_headers(resp):
-    #resp.headers['Content-Security-Policy'] = "default-src 'self'"
+    resp.headers['Content-Security-Policy'] = "default-src 'self' 'unsafe-inline'; \
+                                                style-src-elem  https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css \
+                                                                https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css \
+                                                                http://127.0.0.1:5000/static/css/general.css; \
+                                                script-src      https://code.jquery.com \
+                                                                https://cdnjs.cloudflare.com \
+                                                                https://stackpath.bootstrapcdn.com \
+                                                                'sha256-UDac72eRknf02y+0J5bJ3oEvUL182YjnBUNjXw3DTak=';\
+                                                font-src        https://maxcdn.bootstrapcdn.com"
     resp.headers['X-Frame-Options'] = 'SAMEORIGIN'
     resp.headers['X-XSS-Protection'] = '1; mode=block'
     resp.headers['X-Content-Type-Options'] = 'nosniff'
